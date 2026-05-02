@@ -10,7 +10,8 @@ from __future__ import annotations
   
 import argparse  
 import sys  
-from pathlib import Path  
+from pathlib import Path 
+import re  
   
 if __package__ in {None, ""}:  
     repo_root = Path(__file__).resolve().parents[1]  
@@ -23,7 +24,10 @@ from atp_lean_gnn.dataset import dataset_split_name
 from atp_lean_gnn.lean_env import LeanEnvironment, theorem_info_from_dataset_row  
 from atp_lean_gnn.replay import ReplaySummary, replay_proof  
 from atp_lean_gnn.reporting import console_print  
-  
+
+def strip_lean_dojo_tags(tactic: str) -> str:  
+    """Remove <a>...</a> premise annotations that LeanDojo adds to tactics."""  
+    return re.sub(r"</?a[^>]*>", "", tactic)
   
 def main(argv: list[str] | None = None) -> int:  
     parser = argparse.ArgumentParser(description="Replay gold tactic traces")  
@@ -53,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
             }  
             if len(theorem_traces) > args.limit:  
                 break  
-        theorem_traces[full_name]["tactics"].append(row.get("tactic", ""))  
+        theorem_traces[full_name]["tactics"].append(strip_lean_dojo_tags(row.get("tactic", "")))  
   
     console_print(f"  Collected {len(theorem_traces)} theorem traces")  
   

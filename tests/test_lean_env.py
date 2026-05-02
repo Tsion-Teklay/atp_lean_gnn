@@ -4,7 +4,7 @@ Skipped if lean-dojo is not installed.
 """  
   
 from __future__ import annotations  
-  
+import re 
 import pytest  
   
 try:  
@@ -36,8 +36,9 @@ def test_load_and_apply():
         assert len(state) > 0  
         assert not env.is_complete()  
   
-        # Apply the gold tactic from the dataset  
-        result = env.apply_tactic(row["tactic"])  
+        # Strip <a>...</a> tags and apply the gold tactic  
+        tactic = re.sub(r"</?a[^>]*>", "", row["tactic"])  
+        result = env.apply_tactic(tactic) 
         # It should either succeed or give a clean error  
         assert result.success or len(result.error_message) > 0  
   

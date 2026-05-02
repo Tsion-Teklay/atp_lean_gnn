@@ -85,7 +85,7 @@ class LeanEnvironment:
         repo = LeanGitRepo(info.repo_url, info.commit)  
         theorem = Theorem(repo, info.file_path, info.full_name)  
   
-        self._dojo_context = Dojo(theorem)  
+        self._dojo_context = Dojo(theorem, timeout=1200)  # 20 min timeout for loading/initialization
         dojo, initial_state = self._dojo_context.__enter__()  
         self._dojo = dojo  
         self._current_state = initial_state  
@@ -114,7 +114,7 @@ class LeanEnvironment:
   
         try:  
             result = self._dojo.run_tac(self._current_state, tactic)  
-        except (DojoTimeoutError, Exception) as exc:  
+        except Exception as exc:  
             logger.warning("Tactic '%s' raised: %s", tactic, exc)  
             return StepResult(  
                 success=False, state_text="", completed=False,  
